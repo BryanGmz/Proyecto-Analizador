@@ -1,0 +1,451 @@
+package proyectoanalizador.backed.analizador;
+
+import java.util.List;
+import proyectoanalizador.gui.Frame;
+import java_cup.runtime.*;
+import proyectoanalizador.backed.objetos.*;
+import proyectoanalizador.backed.analizador.manejadores.ManejadorSintactico;
+import proyectoanalizador.backed.objetos.analizador.lexico.*;
+import proyectoanalizador.backed.objetos.analizador.sintactico.*;
+
+parser code {:
+
+    public ManejadorSintactico ms;
+    public Arbol arbol;
+    public ReglasGramaticas rg;
+    public List<Lenguajes> lenguajes;
+    public Frame frame;
+
+    public Sintax(Lexer lexer, Frame frame) { 
+        super(lexer);   
+        this.frame = frame;
+        this.ms = ManejadorSintactico.getInstacia();
+    }
+
+    public Sintax(Lexer lexer) { 
+        super(lexer);   
+        this.ms = ManejadorSintactico.getInstacia();
+    }
+
+    public void setLenguajes(List<Lenguajes> lista){
+        this.lenguajes = lista;
+    }
+
+    public void resetRecursos(){
+        this.arbol = new Arbol();
+        this.rg = new ReglasGramaticas();
+        this.ms.reset(this.frame);
+    }
+
+    @Override
+    public void syntax_error(Symbol s){
+        if(s != null && s.right > 0){
+            try {
+                frame.addError(
+                (("Error Sintaxis\n\tLinea #: " + (s.right + 1) 
+                + "\n\tColumna # " + ((s.left) / s.right + 1)
+                + "\n\tToken NO Reconocido: -> " + (s.value) + "\n" )));
+            } catch (Exception e) {
+                System.out.println("Error " + e.toString());
+            }
+        }
+    }
+:}
+    
+
+/* Terminales */
+
+terminal    NOMBRE, VERSION, AUTOR, EXTENSION, LANZAMIENTO;
+terminal    TERMINAL, NO;
+terminal    ENTERO, CADENA, REAL;
+terminal    SALTO_LINEA, ESPACIO_B, TABULADOR, CODIGO_FUENTE;
+terminal    PORCENTAJES, IGUAL, PUNTO_COMA, COMILLAS, PARENTESIS_A, PARENTESIS_C, LLAVE_A, LLAVE_C;
+terminal    MENOS, INTERROGACION_C, MULTIPLICACION, MAS, COMA, AMPERSAND, BARRA_VERTICAL, DOS_PUNTOS;
+terminal    REGLAS_SEMANTICAS, NUMERO, MAYUSCULA, IDENTIFICADOR, VERSION_NUMEROS, MINUSCULAS, LETRA_MIN, LETRA_MAY, SIGNO;
+
+/* No Terminales */
+ 
+non terminal                inicio;
+non terminal                inf_lenguaje, exp_inf_lenguaje, p_c;
+non terminal                p_nombre, p_version, p_autor, p_lanzamiento, p_extension;
+non terminal    String      p_palabras, pp_palabras, exp_pal_reg, exp_signos;
+non terminal    Integer     cantidad_expresion;
+non terminal                tnt, tnt_p, simbolo_terminal, simbolo_no_terminal, estructura_no_terminales, estructura_terminales;
+non terminal                inicio_exp_reg, exp_regulares, exp_reg, cuerpo_exp_parentesis;
+non terminal                cuerpo_exp_llave, contenido_exp_llave, contenido_exp_llave_p;
+non terminal                s_exp_regulares, contenido_exp_parentesis, exp_regulares_p, p_tipo;
+non terminal                reglas, contenido_reglas, cuerpo_reglas_p, reglas_semanticas, reglas_p, pro_may, pro_min, cuerpo_reglas;
+
+precedence left NOMBRE;
+precedence left VERSION;
+precedence left AUTOR;
+precedence left LANZAMIENTO;
+precedence left EXTENSION;
+precedence left DOS_PUNTOS;
+precedence left PORCENTAJES;
+precedence left BARRA_VERTICAL;
+precedence left IGUAL;
+precedence left PUNTO_COMA;
+precedence left INTERROGACION_C; 
+precedence left MULTIPLICACION; 
+precedence left MAS;
+precedence left MENOS;
+precedence left COMA;
+precedence left AMPERSAND;
+precedence left SALTO_LINEA;
+precedence left ESPACIO_B;
+precedence left TABULADOR;
+precedence left NUMERO, LETRA_MAY, LETRA_MIN, SIGNO;
+precedence left MAYUSCULA;
+
+/* Gramaticas */
+
+start with inicio;
+
+inicio ::= 
+    inf_lenguaje:a CODIGO_FUENTE:c inicio_exp_reg:e tnt reglas      
+/*    {:
+        if (a == null){
+            System.out.println("ERROR");
+        } else {
+            Lenguajes lenguaje = parser.ms.generadorLenguaje(parser.arbol, (Nodo) e, parser.rg, (InfLenguaje) a, c.toString());
+            parser.lenguajes.add(lenguaje);
+            parser.frame.addLng(lenguaje);
+        }
+    :} */
+    | inf_lenguaje:a inicio_exp_reg:e tnt reglas
+/*    {:
+        if (a == null){
+            System.out.println("ERROR");
+        } else {
+            parser.lenguajes.add(parser.ms.generadorLenguaje(parser.arbol, (Nodo) e, parser.rg, (InfLenguaje) a, ""));
+        }
+    :}*/
+;
+
+/* Informacion de Lenguaje */
+
+inf_lenguaje ::= 
+    p_nombre:a exp_inf_lenguaje:e exp_inf_lenguaje:i exp_inf_lenguaje:o exp_inf_lenguaje:u          {:RESULT = parser.ms.comprobarInformacion(aleft, aright, eleft, eright, ileft, iright, oleft, oright, uleft, uright, a, e, i, o, u);:}
+    | exp_inf_lenguaje:a p_nombre:e exp_inf_lenguaje:i exp_inf_lenguaje:o exp_inf_lenguaje:u        {:RESULT = parser.ms.comprobarInformacion(aleft, aright, eleft, eright, ileft, iright, oleft, oright, uleft, uright, a, e, i, o, u);:}
+    | exp_inf_lenguaje:a exp_inf_lenguaje:e p_nombre:i exp_inf_lenguaje:o exp_inf_lenguaje:u        {:RESULT = parser.ms.comprobarInformacion(aleft, aright, eleft, eright, ileft, iright, oleft, oright, uleft, uright, a, e, i, o, u);:}
+    | exp_inf_lenguaje:a exp_inf_lenguaje:e exp_inf_lenguaje:i p_nombre:o exp_inf_lenguaje:u        {:RESULT = parser.ms.comprobarInformacion(aleft, aright, eleft, eright, ileft, iright, oleft, oright, uleft, uright, a, e, i, o, u);:}
+    | exp_inf_lenguaje:a exp_inf_lenguaje:e exp_inf_lenguaje:i exp_inf_lenguaje:o p_nombre:u        {:RESULT = parser.ms.comprobarInformacion(aleft, aright, eleft, eright, ileft, iright, oleft, oright, uleft, uright, a, e, i, o, u);:}
+    | error:e PUNTO_COMA           {:parser.syntax_error((Symbol) e);:}
+;
+
+exp_inf_lenguaje ::= 
+    p_version:e               {:RESULT = e;:}
+    | p_autor:e               {:RESULT = e;:}
+    | p_lanzamiento:e         {:RESULT = e;:}
+    | p_extension:e           {:RESULT = e;:}
+    |                      
+;
+
+p_nombre ::=
+    NOMBRE DOS_PUNTOS p_palabras:e PUNTO_COMA                     {:RESULT = parser.ms.addTabla(e.toString(), eleft, eright, "Nombre");:}
+;
+
+p_version ::=
+    VERSION DOS_PUNTOS VERSION_NUMEROS:e PUNTO_COMA               {:RESULT = parser.ms.addTabla(e.toString(), eleft, eright, "Version");:}
+    | VERSION DOS_PUNTOS NUMERO:e PUNTO_COMA                      {:RESULT = parser.ms.addTabla(e.toString(), eleft, eright, "Version");:}
+;
+
+p_autor ::=
+    AUTOR DOS_PUNTOS p_palabras:a pp_palabras:e PUNTO_COMA
+    {:
+        if(a != null){
+            RESULT = parser.ms.addTabla(a + e, aleft, aright, "Autor");
+        } else {
+            RESULT = parser.ms.addTabla(a, aleft, aright, "Autor");
+        }
+    :}
+;
+
+p_lanzamiento ::=
+    LANZAMIENTO DOS_PUNTOS NUMERO:e PUNTO_COMA          {:RESULT = parser.ms.addTabla(e.toString(), eleft, eright, "Lanzamiento");:}
+;                                                       
+
+p_extension ::=
+    EXTENSION DOS_PUNTOS MINUSCULAS:e PUNTO_COMA        {:RESULT = parser.ms.addTabla(e.toString(), eleft, eright, "Extension");:}
+    | EXTENSION DOS_PUNTOS LETRA_MIN:e PUNTO_COMA       {:RESULT = parser.ms.addTabla(e.toString(), eleft, eright, "Extension");:}
+;
+
+/* Otras */
+
+p_palabras ::= 
+    MAYUSCULA:e             {:RESULT = e.toString();:}
+    | MINUSCULAS:e          {:RESULT = e.toString();:}
+    | IDENTIFICADOR:e       {:RESULT = e.toString();:}
+    | LETRA_MIN:e           {:RESULT = e.toString();:}
+    | LETRA_MAY:e           {:RESULT = e.toString();:}
+;
+
+pp_palabras ::= 
+    p_palabras:e            {:RESULT = e;:}
+    |                       
+;
+
+/* Terminales y No Terminales */
+
+tnt ::= 
+    TERMINAL p_tipo simbolo_terminal p_c tnt_p                       
+    | NO TERMINAL p_tipo simbolo_no_terminal PUNTO_COMA tnt_p     
+;
+
+p_c ::= 
+    PUNTO_COMA {:parser.ms.aumentarCN();:}   
+;
+
+tnt_p ::= 
+    tnt                      
+    | error:e PUNTO_COMA                                               {:parser.syntax_error((Symbol) e);:}
+    | error:e tnt                                               {:parser.syntax_error((Symbol) e);:}
+    | error:e reglas                                            {:parser.syntax_error((Symbol) e);:}
+    |                   
+;
+
+p_tipo ::= 
+    REAL                {:RESULT = "Real";:}
+    | ENTERO            {:RESULT = "Entero";:}
+    | CADENA            {:RESULT = "Cadena";:}
+    |                   {:RESULT = null;:}
+;
+
+simbolo_terminal ::=
+    MINUSCULAS:a estructura_terminales              
+    {:parser.ms.agregarTNT(parser.rg.getTerminales(), true, a.toString(), aleft, aright, null, parser.rg.getPrecedencia(), parser.ms.getcN());:}
+    | LETRA_MIN:a estructura_terminales             
+    {:parser.ms.agregarTNT(parser.rg.getTerminales(), true, a.toString(), aleft, aright, null, parser.rg.getPrecedencia(), parser.ms.getcN());:}
+;
+
+estructura_terminales ::= 
+    COMA simbolo_terminal:a
+    |
+;
+
+simbolo_no_terminal ::=
+    MAYUSCULA:a estructura_no_terminales            {:parser.ms.agregarTNT(parser.rg.getNoTerminales(), false, a.toString(), aleft, aright, parser.rg.getReglasGramaticas(), null, parser.ms.getcN());:}
+    | LETRA_MAY:a estructura_no_terminales          {:parser.ms.agregarTNT(parser.rg.getNoTerminales(), false, a.toString(), aleft, aright, parser.rg.getReglasGramaticas(), null, parser.ms.getcN());:}
+;
+
+estructura_no_terminales ::= 
+    COMA simbolo_no_terminal:a
+    |
+;
+
+/* Expresiones Regulares */
+
+inicio_exp_reg ::=
+    p_palabras:i IGUAL s_exp_regulares:a PUNTO_COMA exp_reg:e
+    {:  
+        if(e == null){
+            ((Nodo) a ).setId(i);  
+            RESULT = (Nodo) a;
+        } else {
+            ((Nodo) a ).setId(i);  
+            RESULT = parser.arbol.insertarNodoYNodo((Nodo) a, (Nodo) e, false);
+        }
+    :}
+    | AMPERSAND:i IGUAL s_exp_regulares:a PUNTO_COMA exp_reg:e
+    {:
+        if(e == null){
+            ((Nodo) a ).setId("&");  
+            ((Nodo) a ).setIgnorar(true);  
+            RESULT = (Nodo) a;
+        } else {
+            ((Nodo) a).setId("&");  
+            ((Nodo) a).setIgnorar(true);  
+            RESULT = parser.arbol.insertarNodoYNodo((Nodo) a, (Nodo) e, false);
+        }
+    :}
+    | error:e PUNTO_COMA                           {:parser.syntax_error((Symbol) e);:}
+    | error:e inicio_exp_reg:a                     {:parser.syntax_error((Symbol) e); RESULT = (Nodo) a;:}
+;
+
+exp_reg ::=
+    inicio_exp_reg:a          {:RESULT = (Nodo) a;:}
+    |                         {:RESULT = null;:}
+;
+
+//Arreglar
+
+s_exp_regulares ::=
+    exp_regulares:a                                           {:RESULT = (Nodo) a;:}
+    | exp_regulares:a BARRA_VERTICAL exp_regulares:e          {:RESULT = parser.arbol.insertarNodoYNodo((Nodo) a, (Nodo) e, false);:}    
+;
+
+exp_regulares ::= 
+    LLAVE_A cuerpo_exp_llave:a LLAVE_C cantidad_expresion:e exp_regulares_p:i                   
+    {:
+        if(i == null){
+            RESULT = parser.arbol.concatencacionExpresionesCant((Nodo) a, (int) e);
+        } else { 
+            RESULT = parser.arbol.insertarNodoYNodo(parser.arbol.concatencacionExpresionesCant((Nodo) a, (int) e), (Nodo) i, true);
+        }
+    :}
+    | COMILLAS:a cantidad_expresion:e exp_regulares_p:i                                          
+    {:
+        if(i == null){
+            RESULT = parser.arbol.concatencacionExpresionesCant(parser.arbol.insertarPalabra(a.toString().replaceAll("\"", "")), (int) e);
+        } else { 
+            RESULT = parser.arbol.insertarNodoYNodo(parser.arbol.concatencacionExpresionesCant(parser.arbol.insertarPalabra(a.toString().replaceAll("\"", "")), (int) e), (Nodo) i, true);
+        }
+    :}
+    | PARENTESIS_A cuerpo_exp_parentesis:a PARENTESIS_C cantidad_expresion:e exp_regulares_p:i   
+    {:
+        if(i == null){
+            RESULT = parser.arbol.concatencacionExpresionesCant((Nodo) a, (int) e);
+        } else { 
+            RESULT = parser.arbol.insertarNodoYNodo(parser.arbol.concatencacionExpresionesCant((Nodo) a, (int) e), (Nodo) i, true);
+        }
+    :}
+;
+
+exp_regulares_p ::=
+    exp_regulares:e         {:RESULT = e;:}
+    |                       {:RESULT = null;:}
+;
+
+cantidad_expresion ::=
+    INTERROGACION_C         {:RESULT = 1;:}
+    | MULTIPLICACION        {:RESULT = 2;:}
+    | MAS                   {:RESULT = 3;:}
+    |                       {:RESULT = 0;:}
+;
+
+// Llave
+
+cuerpo_exp_llave ::=
+    exp_pal_reg:a MENOS exp_pal_reg:e           {:RESULT = parser.arbol.crearUnionCaracteres(a.charAt(0), e.charAt(0), (int) a.charAt(0), (int) e.charAt(0));:}
+    | NUMERO:a MENOS NUMERO:e                   {:RESULT = parser.arbol.crearUnionCaracteres(a.toString().charAt(0), e.toString().charAt(0), (int) a.toString().charAt(0), (int) e.toString().charAt(0));:}
+    | exp_signos:a MENOS exp_signos:e           {:RESULT = parser.arbol.crearUnionCaracteres(a.charAt(0), e.charAt(0), (int) a.charAt(0), (int) e.charAt(0));:}
+    | contenido_exp_llave:e                     {:RESULT = e;:}
+;
+
+contenido_exp_llave ::=
+    exp_pal_reg:e contenido_exp_llave_p:a
+    {:
+        if(a == null){
+            RESULT = parser.arbol.insertarCaracter(e.charAt(0));
+        } else {
+            RESULT = parser.arbol.insertarNodoYNodo(parser.arbol.insertarCaracter(e.charAt(0)), (Nodo) a, false);
+        }
+    :}
+    | NUMERO:e contenido_exp_llave_p:a
+    {:
+        if(a == null){
+            RESULT = parser.arbol.insertarCaracter(e.toString().charAt(0));
+        } else {
+            RESULT = parser.arbol.insertarNodoYNodo(parser.arbol.insertarCaracter(e.toString().charAt(0)), (Nodo) a, false);
+        }
+    :}
+    | exp_signos:e contenido_exp_llave_p:a
+    {:
+        if(a == null){
+            if(e.charAt(0) == '\\' && e.charAt(1) == 'n'){
+                RESULT = parser.arbol.insertarCaracter('\n');
+            } else if (e.charAt(0) == '\\' && e.charAt(1) == 't') {
+                RESULT = parser.arbol.insertarCaracter('\t');
+            } else if (e.charAt(0) == '\\' && e.charAt(1) == 'b') {
+                RESULT = parser.arbol.insertarCaracter('\b');
+            } else {
+                RESULT = parser.arbol.insertarCaracter(e.charAt(0));
+            }
+        } else {
+            if(e.charAt(0) == '\\' && e.charAt(1) == 'n'){
+                RESULT = parser.arbol.insertarNodoYNodo(parser.arbol.insertarCaracter('\n'), (Nodo) a, false);
+            } else if (e.charAt(0) == '\\' && e.charAt(1) == 't') {
+                RESULT = parser.arbol.insertarNodoYNodo(parser.arbol.insertarCaracter('\t'), (Nodo) a, false);
+            } else if (e.charAt(0) == '\\' && e.charAt(1) == 'b') {
+                RESULT = parser.arbol.insertarNodoYNodo(parser.arbol.insertarCaracter('\b'), (Nodo) a, false);
+            } else {
+                RESULT = parser.arbol.insertarNodoYNodo(parser.arbol.insertarCaracter(e.charAt(0)), (Nodo) a, false);
+            }
+        }
+    :}
+;
+
+contenido_exp_llave_p ::=
+    contenido_exp_llave:e           {:RESULT = e;:}
+    |                               {:RESULT = null;:}
+;
+
+exp_pal_reg ::=
+    LETRA_MIN:e     {:RESULT = e.toString();:}
+    | LETRA_MAY:e   {:RESULT = e.toString();:}
+;
+
+exp_signos ::=
+    SIGNO:e                 {:RESULT = e.toString();:}
+    | IGUAL:e               {:RESULT = e.toString();:}
+    | PUNTO_COMA:e          {:RESULT = e.toString();:}
+    | DOS_PUNTOS:e          {:RESULT = e.toString();:}
+    | MENOS:e               {:RESULT = e.toString();:}
+    | INTERROGACION_C:e     {:RESULT = e.toString();:}
+    | MULTIPLICACION:e      {:RESULT = e.toString();:}
+    | MAS:e                 {:RESULT = e.toString();:}
+    | COMA:e                {:RESULT = e.toString();:}
+    | AMPERSAND:e           {:RESULT = e.toString();:}
+    | SALTO_LINEA:e         {:RESULT = e.toString();:}
+    | ESPACIO_B:e           {:RESULT = e.toString();:}
+    | TABULADOR:e           {:RESULT = e.toString();:}
+;
+
+// Parentesis
+
+cuerpo_exp_parentesis ::=
+    contenido_exp_parentesis:a        {:RESULT = a;:}
+    | s_exp_regulares:a               {:RESULT = a;:}
+;
+
+contenido_exp_parentesis ::= 
+    p_palabras:a          {:RESULT = parser.arbol.unionDePalabras(a);:}
+    | NUMERO:a            {:RESULT = parser.arbol.unionDePalabras(a.toString());:}
+    | exp_signos:a        {:RESULT = parser.arbol.unionDePalabras(a);:}
+;
+
+/* Gramatica */
+
+reglas ::=
+    pro_may:s DOS_PUNTOS DOS_PUNTOS cuerpo_reglas:a reglas_semanticas:e reglas_p    {:parser.ms.addRG(a, parser.rg.getReglasGramaticas(), s.toString(), aleft, aright, e.toString());:}
+    | pro_may:s DOS_PUNTOS DOS_PUNTOS reglas_semanticas:e reglas_p                  {:parser.ms.addRG(new NoTerminal(true), parser.rg.getReglasGramaticas(), s.toString(), sleft, sright, e.toString());:}
+    
+;
+
+cuerpo_reglas ::=
+    contenido_reglas:a DOS_PUNTOS p_palabras:b cuerpo_reglas_p:c        {:RESULT = parser.ms.construirSigPro(a, b, c, aleft, aright);:}
+    | contenido_reglas:a cuerpo_reglas_p:c                              {:RESULT = parser.ms.construirSigPro(a, null, c, aleft, aright);:}
+;
+
+contenido_reglas ::= 
+    pro_min:a               {:RESULT = (parser.ms.retornarTNT(parser.rg.getTerminales(), true, a.toString(), aleft, aright));:}
+    | pro_may:a             {:RESULT = (parser.ms.retornarTNT(parser.rg.getNoTerminales(), false, a.toString(), aleft, aright));:}
+;
+
+cuerpo_reglas_p ::=
+    cuerpo_reglas:a         {:RESULT = a;:}
+    |                       {:RESULT = null;:}
+;
+
+reglas_semanticas ::=
+    REGLAS_SEMANTICAS:a     {:RESULT = a.toString().substring(1, a.toString().length() - 1);:}
+    | PUNTO_COMA            {:RESULT = "";:} 
+;
+
+reglas_p ::=
+    reglas 
+    | error:e PUNTO_COMA                 {:parser.syntax_error((Symbol) e);:}
+    | error:e reglas                 {:parser.syntax_error((Symbol) e);:}
+    |                           
+;
+
+pro_min ::=
+    MINUSCULAS:a            {:RESULT = a.toString();:}          
+    | LETRA_MIN:a           {:RESULT = a.toString();:}          
+;
+
+pro_may ::= 
+    MAYUSCULA:a             {:RESULT = a.toString();:}          
+    | LETRA_MAY:a           {:RESULT = a.toString();:}          
+;
