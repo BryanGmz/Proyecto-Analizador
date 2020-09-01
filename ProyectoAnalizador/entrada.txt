@@ -1,0 +1,77 @@
+version: 11.0.7;
+autor: sun Microsystems;
+lanzamiento: 1996;
+extension: java;
+nombre: java;
+
+%% //codigo fuente
+    List<String> listString=new ArrayList<>();
+    
+    public void addString(String valor){
+        listString.add(valor);
+    }
+
+    public Integer suma(Integer numero1,Integer numero2){
+        return numero1+numero2;
+    }
+
+%% //Sección de expresiones regulares
+
+palabra = [a-z]+;
+numero = [0-9]+;
+punto = ".";
+decimal = [0-9]+((.)[0-9]+)?;
+más = "+";
+menos = "-";
+por = "*";
+& = [\n\t]; /* Significa que cuando se encuentre este token deberá ser ignorado */
+
+/*
+//Seccion de simbolos terminales y no terminales
+terminal por, div;
+terminal más, menos;
+terminal entero;
+no terminal E, B, A;
+no terminal S;
+*/
+
+%%
+
+terminal por, div;
+aterminal más, menos;
+terminal entero numero;
+
+no terminal entero S, E;
+
+%%
+/*
+E :: E más E;
+E :: E por E;
+E :: numero;
+*/
+
+S :: E:val {printf("Resultado = %d",val);};
+E :: E:val menos E:val2 {RESULT=val - val2;};
+E :: A:val más E:val2 {RESULT=val + val2;};
+E :: E:val por E:val2 {RESULT=val * val2;};
+E :: E:val div E:val2 {RESULT=val / val2;};
+E :: numero:val {RESULT=val;};
+
+
+/*
+E :: E más T;
+E :: T;
+T :: F; 
+T :: F por T;
+F :: id;
+F :: entero;
+F :: pa E pc;
+*/
+
+/*
+S :: A más E:val {printf("Resultado = %d",val);};
+S :: E:val {RESULT=val - val2;};
+E :: A;
+A :: entero:val {RESULT=val;};
+
+A :: por E:val2  {RESULT=val + val2;}*/
