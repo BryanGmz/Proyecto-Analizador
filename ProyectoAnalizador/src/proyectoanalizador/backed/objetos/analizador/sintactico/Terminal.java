@@ -5,13 +5,14 @@
  */
 package proyectoanalizador.backed.objetos.analizador.sintactico;
 
+import java.io.Serializable;
 import proyectoanalizador.backed.objetos.analizador.lexico.Token;
 
 /**
  *
  * @author bryan
  */
-public class Terminal {
+public class Terminal implements Serializable{
     
     private final String id;
     private Object siguiente;
@@ -20,6 +21,7 @@ public class Terminal {
     private String valorDevuelto;
     private Token token;
     private int nivel;
+    private String tipo;
     
     public Terminal(String id) {
         this.id = id;
@@ -32,6 +34,14 @@ public class Terminal {
         this.primero = id;
     }
 
+    public String getTipo() {
+        return tipo;
+    }
+
+    public void setTipo(String tipo) {
+        this.tipo = tipo;
+    }
+    
     public int getNivel() {
         return nivel;
     }

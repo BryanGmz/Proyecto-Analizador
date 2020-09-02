@@ -5,6 +5,7 @@
  */
 package proyectoanalizador.backed.objetos.analizador.lexico;
 
+import java.io.Serializable;
 import proyectoanalizador.backed.objetos.ConjuntoSiguientes;
 import proyectoanalizador.backed.objetos.TablaSiguientes;
 
@@ -12,7 +13,7 @@ import proyectoanalizador.backed.objetos.TablaSiguientes;
  *
  * @author bryan
  */
-public class Arbol {
+public class Arbol implements Serializable{
     
     private int contador;
     private final TablaSiguientes tabla;

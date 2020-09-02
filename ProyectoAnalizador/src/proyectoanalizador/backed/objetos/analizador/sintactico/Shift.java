@@ -6,6 +6,7 @@
  */
 package proyectoanalizador.backed.objetos.analizador.sintactico;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,7 +14,7 @@ import java.util.List;
  *
  * @author bryan
  */
-public class Shift {
+public class Shift  implements Serializable {
     
     private final Produccion produccion;
     private int shift;

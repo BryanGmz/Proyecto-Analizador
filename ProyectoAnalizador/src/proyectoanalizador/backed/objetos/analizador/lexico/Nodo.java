@@ -5,13 +5,14 @@
  */
 package proyectoanalizador.backed.objetos.analizador.lexico;
 
+import java.io.Serializable;
 import java.util.*;
 
 /**
  *
  * @author bryan
  */
-public class Nodo {
+public class Nodo implements Serializable{
     
     private final List<Integer> primeraPos;
     private final List<Integer> utlimaPos;

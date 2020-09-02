@@ -6,6 +6,7 @@
 package proyectoanalizador.backed.objetos.analizador.sintactico;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import proyectoanalizador.backed.objetos.DiagramaAS;
 
@@ -53,7 +54,17 @@ public class ReglasGramaticas {
         return tablaLALR;
     }
     
+    public void impTipos(){
+//        for (NoTerminal reglasGramatica : reglasGramaticas) {
+//            System.out.println("NT " + reglasGramatica.getId() + " T " + reglasGramatica.getTipo());
+//        }
+//        for (Terminal terminal : precedencia) {
+//            System.out.println("T " + terminal.getId() + " T " + terminal.getTipo());
+//        }
+    }
+    
     private void addNivel(){
+        impTipos();
         for (Produccion p : producciones) {
             Object o = p.getProduccion();
             while (o != null) {
@@ -128,12 +139,16 @@ public class ReglasGramaticas {
                 contador++;
             });
         }
+        for (NoTerminal rg : reglasGramaticas) {
+            System.out.println("producciones " + rg.isLambda() + " " + rg.getId());
+        }
     }
     
     public void printPro(){
+        addPrimeros();
         generarProducciones();
         producciones.stream().map((produccion) -> {
-            System.out.print("\n"+ produccion.getIdProduccion() + "\t" + produccion.getNoTerminal().getId() + " -> " );
+            System.out.print("\n" + produccion.getIdProduccion() + "\t" + produccion.getNoTerminal().getId() + " -> " );
             return produccion;
         }).map((produccion) -> produccion.getProduccion()).map((rg) -> {
             while (rg != null) {
@@ -170,10 +185,16 @@ public class ReglasGramaticas {
     //calcula los primeros
     public void addPrimeros(){
         for (NoTerminal nt : reglasGramaticas) {
-            if (!nt.isLambda()) {
-                recorrerProduccion(nt.getProducciones(), nt, new ArrayList<>());
-            }
+            recorrerProduccion(nt.getProducciones(), nt, new ArrayList<>());
         }
+    }
+    
+    private List<String> primeros(String id){
+        for (NoTerminal reglasGramatica : reglasGramaticas) {
+            if (reglasGramatica.getId().equals(id)) {
+                return reglasGramatica.getPrimeros();
+            }
+        } return new ArrayList<>();
     }
     
     private void recorrerProduccion(List<Object> producciones, NoTerminal produccion, List<String> recorrido){
@@ -230,14 +251,30 @@ public class ReglasGramaticas {
                         addPreAnalisis(((Terminal) ((NoTerminal) tnt).getSiguiente()).getId(), inicial, obtenerProduccion(((NoTerminal) tnt).getId()), new ArrayList<>(), 0);
                     } else {
 //                        System.out.println("2");
+                        
                         for (String pre : ((NoTerminal) (((NoTerminal) tnt).getSiguiente())).getPrimeros()) {
                             addPreAnalisis(pre, inicial, obtenerProduccion(((NoTerminal) tnt).getId()), new ArrayList<>(), 0);
                         }
-                    }
+                    } 
                 } else {
-//                    System.out.println("3");
                     for (String object : t.getPreanalisis()) {
                         addPreAnalisis(object, inicial, obtenerProduccion(((NoTerminal) tnt).getId()), new ArrayList<>(), 0);
+                    }
+                }
+                if (((NoTerminal) tnt).getSiguiente() instanceof NoTerminal) {
+                    if((((NoTerminal)((NoTerminal) tnt).getSiguiente()).getSiguiente() == null) && ((NoTerminal)((NoTerminal) tnt).getSiguiente()).isLambda()){
+                        for (String object : t.getPreanalisis()) {
+                            addPreAnalisis(object, inicial, obtenerProduccion(((NoTerminal) tnt).getId()), new ArrayList<>(), 0);
+                        }
+                    } else if ((((NoTerminal)((NoTerminal) tnt).getSiguiente()).getSiguiente() != null) && ((NoTerminal)((NoTerminal) tnt).getSiguiente()).isLambda()){
+                        if (((NoTerminal)((NoTerminal) tnt).getSiguiente()).getSiguiente() instanceof Terminal) {
+                            
+                            addPreAnalisis(((Terminal) (((NoTerminal)((NoTerminal) tnt).getSiguiente()).getSiguiente())).getId(), inicial, obtenerProduccion(((NoTerminal) tnt).getId()), new ArrayList<>(), 0);
+                        } else {
+                            for (String primero : primeros(((NoTerminal) (((NoTerminal)((NoTerminal) tnt).getSiguiente()).getSiguiente())).getId())) {
+                                addPreAnalisis(primero, inicial, obtenerProduccion(((NoTerminal) tnt).getId()), new ArrayList<>(), 0);
+                            }
+                        }
                     }
                 }
             }
@@ -260,34 +297,35 @@ public class ReglasGramaticas {
         int cont = 0;
         while (estado.getListaTuplas().size() != cont) {
             cont++;
-//            System.out.println("Size  " + estado.getListaTuplas().size() + "#" + estado.getId());
             if (tnt instanceof NoTerminal) {
                 if (((NoTerminal) tnt).getSiguiente() != null) {
                     if (((NoTerminal) tnt).getSiguiente() instanceof Terminal) {
-                        addPreAnalisis(((Terminal) ((NoTerminal) tnt).getSiguiente()).getId(), estado, obtenerProduccion(((NoTerminal) tnt).getId()), new ArrayList<>(), t.getPunto());
+                        addPreAnalisis(((Terminal) ((NoTerminal) tnt).getSiguiente()).getId(), estado, obtenerProduccion(((NoTerminal) tnt).getId()), new ArrayList<>(), 0);
                     } else {
-                        boolean bandera = false;
-                        for (String pre : ((NoTerminal) (((NoTerminal) tnt).getSiguiente())).getPrimeros()) {
-//                            System.out.println("PRE " + ((NoTerminal) tnt).getId());
-                            if (bandera) {
-                                addPreAnalisis(pre, estado, obtenerProduccion(((NoTerminal) tnt).getId()), new ArrayList<>(), 0);
-                            } else {
-                                addPreAnalisis(pre, estado, obtenerProduccion(((NoTerminal) tnt).getId()), new ArrayList<>(), t.getPunto());
-                            }
-                            bandera = true;
+                        for (String pre : primeros(((NoTerminal)((NoTerminal) tnt).getSiguiente()).getId())) {
+                            addPreAnalisis(pre, estado, obtenerProduccion(((NoTerminal) tnt).getId()), new ArrayList<>(), 0);
                         }
                     }
                 } else {
-                    boolean bandera = false;
-//                    System.out.println("E " + estado.getIdEstado());
                     for (String object : t.getPreanalisis()) {
-//                        System.out.println("E " + estado.getId()+" -> " +estado.getIdEstado() + " PRE NULL " + object + " pre: " + ((NoTerminal) tnt).getId() + " punto: " + t.getPunto() + " p: " + t.getProduccion().getIdProduccion());
-                        if (bandera) {
-                            addPreAnalisis(object, estado, obtenerProduccion(((NoTerminal) tnt).getId()), new ArrayList<>(), 0);
-                        } else {
+                        System.out.println("E " + estado.getId()+" -> " +estado.getIdEstado() + " PRE NULL " + object + " pre: " + ((NoTerminal) tnt).getId() + " punto: " + t.getPunto() + " p: " + t.getProduccion().getIdProduccion());
+                        addPreAnalisis(object, estado, obtenerProduccion(((NoTerminal) tnt).getId()), new ArrayList<>(), 0);
+                    }
+                }
+                /* LAMBDA */
+                if (((NoTerminal) tnt).getSiguiente() instanceof NoTerminal) {
+                    if((((NoTerminal)((NoTerminal) tnt).getSiguiente()).getSiguiente() == null) && ((NoTerminal)((NoTerminal) tnt).getSiguiente()).isLambda()){
+                        for (String object : t.getPreanalisis()) {
                             addPreAnalisis(object, estado, obtenerProduccion(((NoTerminal) tnt).getId()), new ArrayList<>(), 0);
                         }
-                        bandera = true;
+                    } else if ((((NoTerminal)((NoTerminal) tnt).getSiguiente()).getSiguiente() != null) && ((NoTerminal)((NoTerminal) tnt).getSiguiente()).isLambda()){
+                        if (((NoTerminal)((NoTerminal) tnt).getSiguiente()).getSiguiente() instanceof Terminal) {
+                            addPreAnalisis(((Terminal) (((NoTerminal)((NoTerminal) tnt).getSiguiente()).getSiguiente())).getId(), estado, obtenerProduccion(((NoTerminal) tnt).getId()), new ArrayList<>(), 0);
+                        } else {
+                            for (String primero : primeros(((NoTerminal) (((NoTerminal)((NoTerminal) tnt).getSiguiente()).getSiguiente())).getId())) {
+                                addPreAnalisis(primero, estado, obtenerProduccion(((NoTerminal) tnt).getId()), new ArrayList<>(), 0);
+                            }
+                        }
                     }
                 }
             }
@@ -357,10 +395,12 @@ public class ReglasGramaticas {
                     }
                     tupla.setShift(new Shift(getProduccion(tupla.getProduccion().getIdProduccion()), aux.getId(), ((Terminal) tnt).getId()));
                 } else {
-                    if (((NoTerminal) tnt).isAceptacion()) {
+                    if (((NoTerminal) tnt).isAceptacion() || ((NoTerminal) tnt).isLambda()) {
                         tupla.setReview(new Review(getProduccion(tupla.getProduccion().getIdProduccion()), tupla.getProduccion().getIdProduccion()));
                     } else {
-                        DEstado aux = comprobarIniciales(tuplasETNT(obtenerP(tupla.getProduccion().getProduccion(), tupla.getPunto()), estado.getListaTuplas()), 
+                        DEstado aux = comprobarIniciales(tuplasETNT(
+                                obtenerP(tupla.getProduccion().getProduccion(), tupla.getPunto()), 
+                                estado.getListaTuplas()), 
                                 obtenerP(tupla.getProduccion().getProduccion(), tupla.getPunto()));
                         if (aux == null) {
                             aux = new DEstado();
@@ -408,8 +448,12 @@ public class ReglasGramaticas {
                     tuplas.add(tupla);
                 }
             } else if (o instanceof NoTerminal){
-                if (((NoTerminal) o).getId().equals(id)) {
-                    tuplas.add(tupla);
+                if (((NoTerminal) o).isLambda()) {
+//                    tuplas.add(tupla);
+                } else {
+                   if (((NoTerminal) o).getId().equals(id)) {
+                        tuplas.add(tupla);
+                    }
                 }
             }
         } return tuplas;
@@ -553,6 +597,7 @@ public class ReglasGramaticas {
     }
     
     public void imprimirPrimeros(){
+        System.out.println("PRIMEROS ");
         reglasGramaticas.stream().map((nt) -> {
             System.out.print(nt.getId() + " -> ");
             return nt;
@@ -564,6 +609,7 @@ public class ReglasGramaticas {
         }).forEachOrdered((_item) -> {
             System.out.println("");
         });
+        System.out.println("AUI AUI ");
     }
     
     private Produccion getProduccion(int id){

@@ -1,6 +1,7 @@
 package proyectoanalizador.backed.analizador;
 
 import java_cup.runtime.*;
+import proyectoanalizador.gui.Frame;
 
 %%
 %class Lexer
@@ -33,6 +34,12 @@ D = [0-9]
 S = [°@ł€¶ŧ←↓→%øþ·ĸŋđðßæ«»¢“”½¬!$¡~_'.¨¿¡]
 
 %{
+
+    public Frame frame;
+
+    public void setFrame(Frame frame) {
+        this.frame = frame;
+    }
 
     private Symbol symbol(int type, Object value){
         return new Symbol(type, yyline + 1, yycolumn + 1, value);
@@ -139,7 +146,7 @@ S = [°@ł€¶ŧ←↓→%øþ·ĸŋđðßæ«»¢“”½¬!$¡~_'.¨¿¡]
 
     /* Error */
 
-    . {System.out.println(
+    . {frame.addError(
                       "\nError Lexico: "
               + "\n\tLinea #:                     << " + (yyline + 1) + " >> "
               + "\n\tColumna #:                   << " + (yycolumn + 1) + " >> "

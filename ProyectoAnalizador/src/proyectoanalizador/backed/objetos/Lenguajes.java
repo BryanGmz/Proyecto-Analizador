@@ -5,6 +5,7 @@
  */
 package proyectoanalizador.backed.objetos;
 
+import java.io.Serializable;
 import proyectoanalizador.backed.objetos.analizador.lexico.AnalizadorLexico;
 import proyectoanalizador.backed.objetos.analizador.sintactico.Pila;
 import proyectoanalizador.backed.objetos.analizador.sintactico.TablaLALR;
@@ -13,7 +14,7 @@ import proyectoanalizador.backed.objetos.analizador.sintactico.TablaLALR;
  *
  * @author bryan
  */
-public class Lenguajes {
+public class Lenguajes implements Serializable{
     private InfLenguaje informacionLenguaje;
     private AnalizadorLexico analizadorLexico;    
     private Pila pila;

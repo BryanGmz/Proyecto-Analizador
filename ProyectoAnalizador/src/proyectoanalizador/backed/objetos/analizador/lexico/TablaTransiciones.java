@@ -5,6 +5,7 @@
  */
 package proyectoanalizador.backed.objetos.analizador.lexico;
 
+import java.io.Serializable;
 import proyectoanalizador.backed.objetos.analizador.sintactico.CaracteresColumnas;
 import proyectoanalizador.backed.objetos.analizador.sintactico.EstadosFilas;
 import java.util.ArrayList;
@@ -17,7 +18,7 @@ import proyectoanalizador.backed.objetos.TablaSiguientes;
  *
  * @author bryan
  */
-public class TablaTransiciones {
+public class TablaTransiciones implements Serializable{
     
     private final TablaSiguientes siguientes;
     private int contadorEstados;

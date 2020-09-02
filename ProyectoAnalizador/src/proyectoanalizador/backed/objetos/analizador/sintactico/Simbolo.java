@@ -5,11 +5,13 @@
  */
 package proyectoanalizador.backed.objetos.analizador.sintactico;
 
+import java.io.Serializable;
+
 /**
  *
  * @author bryan
  */
-public class Simbolo {
+public class Simbolo implements Serializable{
     private String tipo;
     private Object valor;
     private String id;

@@ -33,6 +33,11 @@ public class Pestaña {
         addCaret();
     }
 
+    @Override
+    public Pestaña clone() throws CloneNotSupportedException{
+        return new Pestaña(nombre, textArea, scrollPane, path, frame);
+    }
+    
     private void addEscucha(){
         textArea.addKeyListener(new java.awt.event.KeyAdapter() {
             @Override

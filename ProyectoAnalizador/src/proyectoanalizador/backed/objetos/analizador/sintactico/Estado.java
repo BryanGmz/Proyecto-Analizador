@@ -5,6 +5,7 @@
  */
 package proyectoanalizador.backed.objetos.analizador.sintactico;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,7 +13,7 @@ import java.util.List;
  *
  * @author bryan
  */
-public class Estado {
+public class Estado implements Serializable{
     
     private int idEstado;
     private final List<TNT> estados;

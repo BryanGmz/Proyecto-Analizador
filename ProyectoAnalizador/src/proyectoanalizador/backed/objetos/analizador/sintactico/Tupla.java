@@ -5,13 +5,14 @@
  */
 package proyectoanalizador.backed.objetos.analizador.sintactico;
 
+import java.io.Serializable;
 import java.util.*;
 
 /**
  *
  * @author bryan
  */
-public class Tupla {
+public class Tupla implements Serializable{
     
     private final List<String> preanalisis;
     private final Produccion produccion;

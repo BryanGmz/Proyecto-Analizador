@@ -5,11 +5,13 @@
  */
 package proyectoanalizador.backed.objetos.analizador.sintactico;
 
+import java.io.Serializable;
+
 /**
  *
  * @author bryan
  */
-public class TNT {
+public class TNT implements Serializable{
     
     private String  idEstado;
     private Shift shift;

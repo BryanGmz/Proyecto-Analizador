@@ -5,13 +5,14 @@
  */
 package proyectoanalizador.backed.objetos;
 
+import java.io.Serializable;
 import java.util.*;
 
 /**
  *
  * @author bryan
  */
-public class TablaSiguientes {
+public class TablaSiguientes implements Serializable{
     
     private final List<ConjuntoSiguientes> conjuntoSiguientes;
 

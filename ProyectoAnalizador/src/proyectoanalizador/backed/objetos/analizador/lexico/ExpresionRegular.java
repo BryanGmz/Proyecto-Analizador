@@ -5,13 +5,14 @@
  */
 package proyectoanalizador.backed.objetos.analizador.lexico;
 
+import java.io.Serializable;
 import proyectoanalizador.backed.objetos.TablaSiguientes;
 
 /**
  *
  * @author bryan
  */
-public class ExpresionRegular {
+public class ExpresionRegular implements Serializable{
     
     private String id;
     private Arbol arbol;

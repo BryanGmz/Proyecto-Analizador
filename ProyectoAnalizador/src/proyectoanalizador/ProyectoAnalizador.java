@@ -10,6 +10,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.StringReader;
 import proyectoanalizador.backed.analizador.*;
+import proyectoanalizador.gui.Frame;
 
 /**
  *
@@ -24,7 +25,9 @@ public class ProyectoAnalizador {
     public static void main(String[] args) throws Exception {
         // TODO code application logic here
         GeneradorArchivo archivos = GeneradorArchivo.getGeneradorArchivos();
-        archivos.generador();
+//        archivos.generador();
+            Frame frame = new Frame();
+            frame.setVisible(true);
 //////    | COMILLAS contenido_exp_llave:a COMILLAS cantidad_expresion:e              {:RESULT = parser.arbol.concatencacionExpresionesCant((Nodo) a, (int) e);:}
 //        String entrada = "";
 //        File archivo = new File("/home/bryan/Escritorio/entrada.txt");

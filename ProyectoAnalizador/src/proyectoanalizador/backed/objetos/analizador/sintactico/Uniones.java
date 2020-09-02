@@ -5,11 +5,13 @@
  */
 package proyectoanalizador.backed.objetos.analizador.sintactico;
 
+import java.io.Serializable;
+
 /**
  *
  * @author bryan
  */
-public class Uniones {
+public class Uniones implements Serializable{
     
     private int primerEstado;
     private int segundoEstado;

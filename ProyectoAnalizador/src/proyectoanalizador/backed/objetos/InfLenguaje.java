@@ -5,11 +5,13 @@
  */
 package proyectoanalizador.backed.objetos;
 
+import java.io.Serializable;
+
 /**
  *
  * @author bryan
  */
-public class InfLenguaje {
+public class InfLenguaje implements Serializable{
     
     private String nombre;
     private String autor;

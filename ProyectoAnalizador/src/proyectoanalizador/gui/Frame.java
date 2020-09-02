@@ -15,11 +15,14 @@ import java.util.logging.Logger;
 import javax.swing.JFileChooser;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
+import javax.swing.SwingUtilities;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import proyectoanalizador.backed.analizador.Lexer;
 import proyectoanalizador.backed.analizador.Sintax;
+import proyectoanalizador.backed.analizador.manejadores.ManejadorArchivosBinarios;
 import proyectoanalizador.backed.analizador.manejadores.ManejadorEntrada;
 import proyectoanalizador.backed.analizador.manejadores.ManejadorGeneradorHTML;
 import proyectoanalizador.backed.objetos.InfLenguaje;
@@ -37,31 +40,44 @@ public class Frame extends javax.swing.JFrame {
     private final List<FileNameExtensionFilter> extensionesLenguajes;
     private final List<Lenguajes> lenguajes;
     private DialogBorrarLenguaje borrarLenguaje;
+    private DialogErrores dialogErrores;
     private ManejadorEntrada me = ManejadorEntrada.getManejadorEntrada();
     private ManejadorGeneradorHTML generadorHTML;
     private Lenguajes actual;
     private Pestaña pActual;
     private List<String> errores;
+    private int contadorPestanias;
+    private ManejadorArchivosBinarios<Lenguajes> archivosBinarios;
     
     /**
      * Creates new form Frame
      */
     public Frame() {
         initComponents();
+        crearCarpeta();
+        contadorPestanias = 1;
+        this.dialogErrores = new DialogErrores(this, true);
         this.pestañas = new ArrayList<>();
         this.extensionesLenguajes = new ArrayList<>();
-        this.lenguajes = new ArrayList<>();
-        this.extensionesLenguajes.add(new FileNameExtensionFilter("Archivo que contiene la estructura de un lenguaje. (.len)", ".len"));
-        agregarPestaña("Java.java", "", "// TODO code application logic here");
-        agregarPestaña("C++.ccp", "", "// TODO code application logic here");
-        agregarPestaña("JavaScript.js", "", "// TODO code application logic here");
-        agregarPestaña("Html.html", "", "// TODO code application logic here");
-        agregarPestaña("XML.xml", "", "// TODO code application logic here");
+        this.errores = new ArrayList<>();
+        this.archivosBinarios =  new ManejadorArchivosBinarios<>();
+        this.lenguajes = archivosBinarios.leerListaArchivos(ManejadorArchivosBinarios.EXTENSION_ARCHIVO);
+        this.extensionesLenguajes.add(new FileNameExtensionFilter("Archivo que contiene la estructura de un lenguaje. (.len)", "len"));
+        agregarPestaña("Documento " + contadorPestanias, "", "");
+        contadorPestanias++;
+        agregarPestaña("Documento " + contadorPestanias, "", "");
+        contadorPestanias++;
+        agregarPestaña("Documento " + contadorPestanias, "", "");
+        contadorPestanias++;
+        agregarPestaña("Documento " + contadorPestanias, "", "");
+        contadorPestanias++;
         this.setLocationRelativeTo(null);
         menuTablaLALR.setEnabled(false);
         menuPila.setEnabled(false);
         menuCompilar.setEnabled(false);
         menuErrores.setEnabled(false);
+        removerMenus();
+        
     }
 
     public List<String> getErrores() {
@@ -262,6 +278,11 @@ public class Frame extends javax.swing.JFrame {
         menuPrincipal.add(menuVer);
 
         menuErrores.setText("Errores");
+        menuErrores.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                menuErroresMouseClicked(evt);
+            }
+        });
         menuPrincipal.add(menuErrores);
 
         setJMenuBar(menuPrincipal);
@@ -282,8 +303,9 @@ public class Frame extends javax.swing.JFrame {
 
     private void menuNuevoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuNuevoActionPerformed
         // TODO add your handling code here:
-        String nombreArchivo = JOptionPane.showInputDialog("Nombre del Archivo:");
-        agregarPestaña(nombreArchivo, "", "// TODO code application logic here");
+//        String nombreArchivo = JOptionPane.showInputDialog("Nombre del Archivo:");
+        agregarPestaña("Documento " + contadorPestanias, "", "// TODO code application logic here");
+        contadorPestanias++;
     }//GEN-LAST:event_menuNuevoActionPerformed
     
     /* Metodo para cargar un nuevo lenguaje. */
@@ -311,34 +333,54 @@ public class Frame extends javax.swing.JFrame {
                 String entradaTXT = me.entradaTexto(docIde);
                 System.out.println("Entrada: \n" + entradaTXT);
                 Lexer lexer = new Lexer(new StringReader(entradaTXT));
+                lexer.setFrame(this);
                 Sintax sintax = new Sintax(lexer, this);
                 sintax.setLenguajes(lenguajes);
                 sintax.resetRecursos();
                 try {
                     sintax.parse();
+                    guardarLenguajes();
+                    JOptionPane.showMessageDialog(this, "Lenguaje Cargado");
                 } catch (Exception ex) {
-//                    ex.printStackTrace();
+                    ex.printStackTrace();
                     System.out.println("Revisa tu entrada");
+                    menuPila.setEnabled(false);
+                    menuTablaLALR.setEnabled(false);
+                    JOptionPane.showMessageDialog(this, "Error, en la sintaxis el archivo de entrada. Revisa el apartado de errores para mayor información", "ERROR", JOptionPane.ERROR_MESSAGE);
+                    menuErrores.setEnabled(true);
+                    removerMenus();
                 }
             } catch (IOException ex) {
                 System.out.println("Error en carga archivo .len");
             }
+            
             if (errores.isEmpty()) {
-                JOptionPane.showMessageDialog(this, "Lenguaje Cargado");
+                
             } else {
-                menuPila.setEnabled(false);
-                menuTablaLALR.setEnabled(false);
-                JOptionPane.showMessageDialog(this, "Error, en la sintaxis el archivo de entrada. Revisa el apartado de errores para mayor información", "ERROR", JOptionPane.ERROR_MESSAGE);
+                
             }
         }
-//        lenguajes.add(new Lenguajes(new InfLenguaje("Java", "java")));
-        lenguajes.add(new Lenguajes(new InfLenguaje("C")));
-        lenguajes.add(new Lenguajes(new InfLenguaje("HTML", "html")));
-//        agregarLenguaje("Java");
-        agregarLenguaje("C");
-        agregarLenguaje("HTML");
     }//GEN-LAST:event_menuCargarLenguajeActionPerformed
 
+    
+    private void guardarLenguajes(){
+        lenguajes.forEach((lenguaje) -> {
+            archivosBinarios.crearArchivo(lenguaje, ManejadorArchivosBinarios.TIPO_ARCHIVO, 
+                    lenguaje.getInformacionLenguaje().getVersion() + lenguaje.getInformacionLenguaje().getNombre(), ManejadorArchivosBinarios.EXTENSION_ARCHIVO);
+        });
+    }
+    
+    private void crearCarpeta(){
+        File directorio = new File("./Repositorio");
+        if (!directorio.exists()) {
+            if (directorio.mkdir()) {
+                System.out.println("Directorio creado");
+            } else {
+                System.out.println("Error al crear directorio");
+            }
+        }
+    }
+    
     private void menuBorrarLenguajeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuBorrarLenguajeActionPerformed
         // TODO add your handling code here:
         borrarLenguaje = null;
@@ -348,12 +390,13 @@ public class Frame extends javax.swing.JFrame {
         txtLenguajeSeleccionado.setText("");
         menuPila.setEnabled(false);
         menuTablaLALR.setEnabled(false);
+        removerMenus();
     }//GEN-LAST:event_menuBorrarLenguajeActionPerformed
 
     private void menuCompilarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuCompilarActionPerformed
         // TODO add your handling code here:
         if (!txtLenguajeSeleccionado.getText().isEmpty() && actual != null) {
-            JOptionPane.showMessageDialog(this, "Lenguaje Compilar: " + getLenguaje(txtLenguajeSeleccionado.getText()));
+            JOptionPane.showMessageDialog(this, "Lenguaje Compilar: " + getLenguaje(txtLenguajeSeleccionado.getText()).getInformacionLenguaje().getNombre());
             JOptionPane.showMessageDialog(this, "Archivo: " + pestañaActual);
             pActual = getPestaña();
             try {
@@ -397,6 +440,12 @@ public class Frame extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_menuAbrirActionPerformed
 
+    private void agregarPest(){
+        for (Pestaña pestaña : pestañas) {
+            panelConPestañas.addTab(pestaña.getNombre(), pestaña.getScrollPane());
+        }
+    }
+    
     private void menuGuardarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuGuardarActionPerformed
         // TODO add your handling code here:
         Pestaña aux = getPestaña();
@@ -410,9 +459,20 @@ public class Frame extends javax.swing.JFrame {
                     try {
                         File archivo = chooser.getSelectedFile();
                         if (aux.getPath() == null || aux.getPath().isEmpty()) {
-                            aux.setPath(archivo.getAbsolutePath() + extension());
+                            if (actual != null) {
+                                System.out.println("Extenson " + actual.getInformacionLenguaje().getExtension());
+                                aux.setPath(archivo.getAbsolutePath() + extension());
+                            } else {
+                                JOptionPane.showMessageDialog(this, "Debido a que no has seleccionado ningun lenguaje se guardara con extension \".txt\"");
+                                aux.setPath(archivo.getAbsolutePath() + ".txt");
+                            }
                         }
+                        Pestaña pestaña = getPestaña();
+                        pestaña.setNombre(archivo.getName());
                         guardar(aux.getPath(), aux.getTextArea().getText());
+                        this.panelConPestañas.removeAll();
+                        this.panelConPestañas.updateUI();
+                        agregarPest();
                         JOptionPane.showMessageDialog(this, "Guardado");
                     } catch (IOException ex) {
                         System.out.println("Error en carga archivo");
@@ -444,9 +504,19 @@ public class Frame extends javax.swing.JFrame {
                     File archivo = chooser.getSelectedFile();
                     String path = (archivo.getAbsolutePath() + extension());
                     guardar(path, aux.getTextArea().getText());
+                    Pestaña clone = aux.clone();
+                    clone.setPath(path);
+                    clone.setNombre(archivo.getName());
+                    pestañas.remove(aux);
+                    pestañas.add(clone);
+                    this.panelConPestañas.removeAll();
+                    this.panelConPestañas.updateUI();
+                    agregarPest();
                     JOptionPane.showMessageDialog(this, "Guardado");
                 } catch (IOException ex) {
                     System.out.println("Error en carga archivo");
+                } catch (CloneNotSupportedException ex) {
+                    Logger.getLogger(Frame.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
         } else {
@@ -476,6 +546,12 @@ public class Frame extends javax.swing.JFrame {
    
         }
     }//GEN-LAST:event_menuTablaLALRActionPerformed
+
+    private void menuErroresMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_menuErroresMouseClicked
+        // TODO add your handling code here:
+        dialogErrores.addErrores(errores);
+        dialogErrores.setVisible(true);
+    }//GEN-LAST:event_menuErroresMouseClicked
 
     private void abrirHTML(String path){
         try {
@@ -514,14 +590,18 @@ public class Frame extends javax.swing.JFrame {
             public void actionPerformed(ActionEvent e) {//Evento del boton lenguajes
                 txtLenguajeSeleccionado.setText(nuevoLenguaje.getText());
                 actual = lA(nuevoLenguaje.getText());
-                if (actual.getTablaLALR().isConlfictos()) {
-                    JOptionPane.showMessageDialog(null, "Lo siento, la gramatica de este lenguaje posee conflictos. Por lo tanto los botones del area Ver estan desactivados.");
-                    menuTablaLALR.setEnabled(false);
-                    menuCompilar.setEnabled(false);
-                } else {
-                    menuTablaLALR.setEnabled(true);
-                    menuCompilar.setEnabled(true);
+                if (actual != null) {
+                    System.out.println("Actual " + actual.getInformacionLenguaje().getExtension());
+                    if (actual.getTablaLALR().isConlfictos()) {
+                        JOptionPane.showMessageDialog(null, "Lo siento, la gramatica de este lenguaje posee conflictos. Por lo tanto los botones del area Ver estan desactivados.");
+                        menuTablaLALR.setEnabled(false);
+                        menuCompilar.setEnabled(false);
+                    } else {
+                        menuTablaLALR.setEnabled(true);
+                        menuCompilar.setEnabled(true);
+                    }
                 }
+               
             }
         });
         menuLenguajes.add(nuevoLenguaje);

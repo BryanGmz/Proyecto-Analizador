@@ -5,11 +5,13 @@
  */
 package proyectoanalizador.backed.objetos.analizador.sintactico;
 
+import java.io.Serializable;
+
 /**
  *
  * @author bryan
  */
-public class Review {
+public class Review implements Serializable{
     
     private final Produccion produccionReview;
     private final int idProduccion;

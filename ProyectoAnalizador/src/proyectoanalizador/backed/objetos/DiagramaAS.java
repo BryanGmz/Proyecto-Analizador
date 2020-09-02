@@ -5,6 +5,7 @@
  */
 package proyectoanalizador.backed.objetos;
 
+import java.io.Serializable;
 import proyectoanalizador.backed.objetos.analizador.sintactico.DEstado;
 import java.util.*;
 
@@ -12,7 +13,7 @@ import java.util.*;
  *
  * @author bryan
  */
-public class DiagramaAS {
+public class DiagramaAS implements Serializable{
  
     private final List<DEstado> estados;
 //    private int contador;

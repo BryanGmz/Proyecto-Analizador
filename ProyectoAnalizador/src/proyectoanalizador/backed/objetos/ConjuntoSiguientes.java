@@ -5,6 +5,7 @@
  */
 package proyectoanalizador.backed.objetos;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,7 +13,7 @@ import java.util.List;
  *
  * @author bryan
  */
-public class ConjuntoSiguientes {
+public class ConjuntoSiguientes implements Serializable{
     private char caracter;
     private int numeroConjunto;
     private final List<Integer> siguientes;

@@ -5,11 +5,13 @@
  */
 package proyectoanalizador.backed.objetos.analizador.lexico;
 
+import java.io.Serializable;
+
 /**
  *
  * @author bryan
  */
-public class Token {
+public class Token implements Serializable{
     
     private String id;
     private String valor;

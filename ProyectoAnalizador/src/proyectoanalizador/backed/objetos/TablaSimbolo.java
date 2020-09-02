@@ -5,6 +5,7 @@
  */
 package proyectoanalizador.backed.objetos;
 
+import java.io.Serializable;
 import proyectoanalizador.backed.objetos.analizador.sintactico.Simbolo;
 import java.util.List;
 
@@ -12,7 +13,7 @@ import java.util.List;
  *
  * @author bryan
  */
-public class TablaSimbolo {
+public class TablaSimbolo implements Serializable{
     private List<Simbolo> simbolos;
     private String id;
     

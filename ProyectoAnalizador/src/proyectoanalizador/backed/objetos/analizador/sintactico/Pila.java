@@ -5,6 +5,7 @@
  */
 package proyectoanalizador.backed.objetos.analizador.sintactico;
 
+import java.io.Serializable;
 import proyectoanalizador.backed.objetos.analizador.lexico.AnalizadorLexico;
 import proyectoanalizador.backed.objetos.analizador.lexico.Token;
 import java.util.ArrayList;
@@ -15,7 +16,7 @@ import java.util.Stack;
  *
  * @author bryan
  */
-public class Pila {
+public class Pila implements Serializable{
      
     private final AnalizadorLexico analizadorLexico;
     private final Stack<Integer> pilaEstados;
@@ -26,6 +27,9 @@ public class Pila {
     private final List<String> registroAcciones;
     private String produccionInical;
     private int conflicto;
+    private List<Terminal> listaTerminales;
+    private List<NoTerminal> listaNoTerminales;
+    private String actionCode;
     
     public Pila(AnalizadorLexico analizadorLexico, List<Estado> estado) {
         this.analizadorLexico = analizadorLexico;
@@ -36,6 +40,14 @@ public class Pila {
         this.registroSimbolos = new ArrayList<>();
         this.listaEstado = estado;
         this.conflicto = -1;
+    }
+
+    public String getActionCode() {
+        return actionCode;
+    }
+
+    public void setActionCode(String actionCode) {
+        this.actionCode = actionCode;
     }
 
     public List<String> getRegistroEstados() {
@@ -53,17 +65,21 @@ public class Pila {
     public void setProduccionInical(String produccionInical) {
         this.produccionInical = produccionInical;
     }
-    
-    private boolean resolverConflicto(int id){
-        for (Estado estado : listaEstado) {
-            if (estado.getIdEstado() == id) {
-                for (TNT e : estado.getEstados()) {
-                    if (e.isConflictos()) {
-                        return true;
-                    }
-                }
-            }
-        } return false;
+
+    public List<Terminal> getListaTerminales() {
+        return listaTerminales;
+    }
+
+    public void setListaTerminales(List<Terminal> listaTerminales) {
+        this.listaTerminales = listaTerminales;
+    }
+
+    public List<NoTerminal> getListaNoTerminales() {
+        return listaNoTerminales;
+    }
+
+    public void setListaNoTerminales(List<NoTerminal> listaNoTerminales) {
+        this.listaNoTerminales = listaNoTerminales;
     }
     
     public void pilas(){
@@ -105,27 +121,21 @@ public class Pila {
                     estadoActual = pilaEstados.peek();
                     gtr = retornarInterseccion(getEstado(pilaEstados.peek()), enTurno);
                 } else if(gtr.getReview() != null) {
-                    if (gtr.getReview().getProduccionReview().getNoTerminal().getId().equals(produccionInical)) {
-//                        pilaEstados.removeAllElements();
-//                        pilaEstados.add(1);
-                        review(gtr);
+                    if (gtr.getReview().getProduccionReview().getNoTerminal().isLambda() && gtr.getReview().getProduccionReview().getProduccion() instanceof NoTerminal && 
+                            ((NoTerminal) gtr.getReview().getProduccionReview().getProduccion()).isLambda()) {
+//                        pilaSimbolos.pop();
+                        pilaSimbolos.push(gtr.getReview().getProduccionReview().getNoTerminal().getId());
                         registroEstados.add(getPilaEstados());
                         registroSimbolos.add(getPilaSimbolos());
                         registroAcciones.add("Review ( " + estadoActual + ", " + enTurno.getId() + ") " + gtr.getReview().getProduccionReview().produccion());
-//                        System.out.println("Review ( " + estadoActual + ", " + enTurno.getId() + ") " + gtr.getReview().getProduccionReview().produccion());
-                        estadoActual = pilaEstados.peek();
-                        gtr = retornarInterseccion(getEstado(pilaEstados.peek()), new Token(pilaSimbolos.peek(), ""));
                     } else {
-//                        pilaEstados.pop();
                         review(gtr);
                         registroEstados.add(getPilaEstados());
-//                        System.out.println(getPilaEstados());
                         registroSimbolos.add(getPilaSimbolos());
                         registroAcciones.add("Review ( " + estadoActual + ", " + enTurno.getId() + ") " + gtr.getReview().getProduccionReview().produccion());
-//                        System.out.println("Review E( " + estadoActual + ", " + enTurno.getId() + ") " + gtr.getReview().getProduccionReview().produccion());
+                    }
                         estadoActual = pilaEstados.peek();
                         gtr = retornarInterseccion(getEstado(pilaEstados.peek()), new Token(pilaSimbolos.peek(), ""));
-                    }
                 } else if(gtr.isAceptar()) {
                     registroEstados.add(getPilaEstados());
                     registroSimbolos.add(getPilaSimbolos());

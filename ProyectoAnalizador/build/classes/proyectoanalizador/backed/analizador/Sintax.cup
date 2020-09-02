@@ -104,7 +104,7 @@ start with inicio;
 
 inicio ::= 
     inf_lenguaje:a CODIGO_FUENTE:c inicio_exp_reg:e tnt reglas      
-/*    {:
+    {:
         if (a == null){
             System.out.println("ERROR");
         } else {
@@ -112,15 +112,15 @@ inicio ::=
             parser.lenguajes.add(lenguaje);
             parser.frame.addLng(lenguaje);
         }
-    :} */
+    :} 
     | inf_lenguaje:a inicio_exp_reg:e tnt reglas
-/*    {:
+    {:
         if (a == null){
             System.out.println("ERROR");
         } else {
             parser.lenguajes.add(parser.ms.generadorLenguaje(parser.arbol, (Nodo) e, parser.rg, (InfLenguaje) a, ""));
         }
-    :}*/
+    :}
 ;
 
 /* Informacion de Lenguaje */
@@ -189,8 +189,8 @@ pp_palabras ::=
 /* Terminales y No Terminales */
 
 tnt ::= 
-    TERMINAL p_tipo simbolo_terminal p_c tnt_p                       
-    | NO TERMINAL p_tipo simbolo_no_terminal PUNTO_COMA tnt_p     
+    TERMINAL p_tipo:e simbolo_terminal p_c tnt_p                      
+    | NO TERMINAL p_tipo:e simbolo_no_terminal PUNTO_COMA tnt_p           
 ;
 
 p_c ::= 
@@ -199,17 +199,17 @@ p_c ::=
 
 tnt_p ::= 
     tnt                      
-    | error:e PUNTO_COMA                                               {:parser.syntax_error((Symbol) e);:}
+    | error:e PUNTO_COMA                                        {:parser.syntax_error((Symbol) e);:}
     | error:e tnt                                               {:parser.syntax_error((Symbol) e);:}
     | error:e reglas                                            {:parser.syntax_error((Symbol) e);:}
     |                   
 ;
 
 p_tipo ::= 
-    REAL                {:RESULT = "Real";:}
-    | ENTERO            {:RESULT = "Entero";:}
-    | CADENA            {:RESULT = "Cadena";:}
-    |                   {:RESULT = null;:}
+    REAL                {:parser.ms.addTipo("real"); RESULT = "Real";:}
+    | ENTERO            {:parser.ms.addTipo("entero"); RESULT = "Entero";:}
+    | CADENA            {:parser.ms.addTipo("cadena"); RESULT = "Cadena";:}
+    |                   {:parser.ms.addTipo(null); RESULT = null;:}
 ;
 
 simbolo_terminal ::=

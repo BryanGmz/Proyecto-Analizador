@@ -5,6 +5,7 @@
  */
 package proyectoanalizador.backed.objetos.analizador.sintactico;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,7 +13,7 @@ import java.util.List;
  *
  * @author bryan
  */
-public class NoTerminal {
+public class NoTerminal implements Serializable{
     
     private String id;
     private boolean aceptacion;
@@ -20,6 +21,7 @@ public class NoTerminal {
     private String reglaSemantica;
     private boolean lambda;
     private List<String> primeros;
+    private String tipo;
     
     //Cuando es una produccion
     private List<Object>  producciones;
@@ -40,6 +42,14 @@ public class NoTerminal {
 
     public NoTerminal(boolean lambda) {
         this.lambda = lambda;
+    }
+
+    public String getTipo() {
+        return tipo;
+    }
+
+    public void setTipo(String tipo) {
+        this.tipo = tipo;
     }
     
     public boolean isLambda() {
@@ -131,6 +141,9 @@ public class NoTerminal {
     
     @Override
     public String toString(){
+        if (lambda) {
+            return "";
+        }
         return id;
     }
 }

@@ -5,6 +5,7 @@
  */
 package proyectoanalizador.backed.objetos.analizador.sintactico;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,7 +13,7 @@ import java.util.List;
  *
  * @author bryan
  */
-public class TablaLALR {
+public class TablaLALR implements Serializable {
     
     private List<String> terminalesNoTerminales;
     private List<Estado> estados;

@@ -5,13 +5,14 @@
  */
 package proyectoanalizador.backed.objetos.analizador.sintactico;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
  *
  * @author bryan
  */
-public class CaracteresColumnas {
+public class CaracteresColumnas implements Serializable{
     
     private char caracater;
     private int estado;

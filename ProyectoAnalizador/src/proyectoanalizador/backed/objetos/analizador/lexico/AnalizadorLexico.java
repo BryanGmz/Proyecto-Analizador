@@ -5,6 +5,7 @@
  */
 package proyectoanalizador.backed.objetos.analizador.lexico;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
@@ -15,7 +16,7 @@ import proyectoanalizador.backed.objetos.analizador.sintactico.EstadosFilas;
  *
  * @author bryan
  */
-public class AnalizadorLexico {
+public class AnalizadorLexico implements Serializable {
     
     private TablaTransiciones tt;
     private String entrada;

@@ -3,13 +3,14 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/home/bryan/Documentos/Lab.%20Archivos/ProyectoAnalizador/src/proyectoanalizador/ProyectoAnalizador.java</file>
-            <file>file:/home/bryan/Documentos/Lab.%20Archivos/ProyectoAnalizador/src/proyectoanalizador/backed/analizador/manejadores/ManejadorGeneradorHTML.java</file>
-            <file>file:/home/bryan/Documentos/Lab.%20Archivos/ProyectoAnalizador/src/proyectoanalizador/backed/objetos/analizador/sintactico/TablaLALR.java</file>
-            <file>file:/home/bryan/Documentos/Lab.%20Archivos/ProyectoAnalizador/src/proyectoanalizador/backed/analizador/Sintax.java</file>
-            <file>file:/home/bryan/Documentos/Lab.%20Archivos/ProyectoAnalizador/src/proyectoanalizador/backed/objetos/analizador/sintactico/Pila.java</file>
-            <file>file:/home/bryan/Documentos/Lab.%20Archivos/ProyectoAnalizador/src/proyectoanalizador/gui/Frame.java</file>
-            <file>file:/home/bryan/Documentos/Lab.%20Archivos/ProyectoAnalizador/src/proyectoanalizador/backed/analizador/Sintax.cup</file>
+            <file>file:/home/bryangmz/Documentos/Compiladores%202/Proyecto-Analizador/ProyectoAnalizador/src/proyectoanalizador/backed/objetos/Lenguajes.java</file>
+            <file>file:/home/bryangmz/Documentos/Compiladores%202/Proyecto-Analizador/ProyectoAnalizador/src/proyectoanalizador/backed/analizador/manejadores/ManejadorArchivosBinarios.java</file>
+            <file>file:/home/bryangmz/Documentos/Compiladores%202/Proyecto-Analizador/ProyectoAnalizador/src/proyectoanalizador/ProyectoAnalizador.java</file>
+            <file>file:/home/bryangmz/Documentos/Compiladores%202/Proyecto-Analizador/ProyectoAnalizador/src/proyectoanalizador/backed/analizador/Lexer.java</file>
+            <file>file:/home/bryangmz/Documentos/Compiladores%202/Proyecto-Analizador/ProyectoAnalizador/src/proyectoanalizador/gui/Frame.java</file>
+            <file>file:/home/bryangmz/Documentos/Compiladores%202/Proyecto-Analizador/ProyectoAnalizador/src/proyectoanalizador/backed/objetos/analizador/sintactico/Terminal.java</file>
+            <file>file:/home/bryangmz/Documentos/Compiladores%202/Proyecto-Analizador/ProyectoAnalizador/src/proyectoanalizador/backed/objetos/analizador/sintactico/NoTerminal.java</file>
+            <file>file:/home/bryangmz/Documentos/Compiladores%202/Proyecto-Analizador/ProyectoAnalizador/src/proyectoanalizador/backed/objetos/analizador/sintactico/ReglasGramaticas.java</file>
         </group>
     </open-files>
 </project-private>

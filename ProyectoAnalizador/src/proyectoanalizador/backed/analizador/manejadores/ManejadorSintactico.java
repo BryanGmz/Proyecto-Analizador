@@ -74,7 +74,7 @@ public class ManejadorSintactico {
     }
     
     public void errorSemantico(int left, int right, String valor, String mensaje){
-        System.out.println(
+        frame.addError(
             "\nError Semantico: " 
             + "\n\tLinea #:                 << " + (right + 1) + " >>"
             + "\n\tColumna #                << " + (((left)/(right)) + 1) + " >>"
@@ -153,10 +153,12 @@ public class ManejadorSintactico {
         rg.addEstadoInicial(rg.getReglasGramaticas().get(rg.getReglasGramaticas().size() - 1));
         rg.printPro();
         rg.addPrimeros();
-//        rg.imprimirPrimeros();
+        rg.imprimirPrimeros();
         rg.initDiagram();
         rg.impDiagram();
         Pila pila = new Pila(al, rg.getTablaLALR().getEstados());
+        pila.setListaNoTerminales(rg.getReglasGramaticas());
+        pila.setListaTerminales(rg.getPrecedencia());
         pila.setProduccionInical(rg.getEstadoInicial());
         Lenguajes lenguaje = new Lenguajes();
         lenguaje.setAnalizadorLexico(al);
@@ -165,6 +167,37 @@ public class ManejadorSintactico {
         lenguaje.setPila(pila);
         lenguaje.setActionCode(actionCode);
         return lenguaje;
+    }
+    
+    public void addTipo(Object e){
+        Object c =  tablaSimbolos.buscarPorTipo("-var");
+        if (c == null) {
+            tablaSimbolos.agregarTablaTemp(e, "-var");
+        } else {
+            tablaSimbolos.removerPorTipo("-var");
+            tablaSimbolos.agregarTablaTemp(e, "-var");
+        }
+    }
+    
+    /* Agregar Tipo de terminales y no terminales */
+   
+    public void addTipoTNT(List<NoTerminal> listaNT, List<Terminal> listaT, Object tipo){
+//        List<String> listaObjectsTNT = (List<String>) tablaSimbolos.buscarPorTipo("ListaTNT");
+//        System.out.println("Tipo " + tipo + " " + listaObjectsTNT.size() + " " + listaObjectsTNT);
+//        if (tipo != null) {
+//            for (NoTerminal noTerminal : listaNT) {
+//                if (listaObjectsTNT.contains(noTerminal.getId())) {
+//                    noTerminal.setTipo((String) tipo);
+//                }
+//            }
+//            for (Terminal terminal : listaT) {
+//                if (listaObjectsTNT.contains(terminal.getId())) {
+//                    terminal.setTipo((String) tipo);
+//                }
+//            }
+//        } 
+//        tablaSimbolos.removerPorTipo("ListaTNT");
+//        tablaSimbolos.agregarTablaTemp(new ArrayList<>(),"ListaTNT");
     }
     
     /* Reglas Terminales */
@@ -179,9 +212,17 @@ public class ManejadorSintactico {
         } else {
             if (terminal) {
                 lista.add(aux);
-                listaT.add(new Terminal(aux, contadorLVL));
+                Terminal add = new Terminal(aux, contadorLVL);
+                if (tablaSimbolos.buscarPorTipo("-var") != null) {
+                     add.setTipo((String) tablaSimbolos.buscarPorTipo("-var"));
+                }
+                listaT.add(add);
             } else {
-                listaNT.add(new NoTerminal(aux, true));
+                NoTerminal add = new NoTerminal(aux, true);
+                if (tablaSimbolos.buscarPorTipo("-var") != null) {
+                     add.setTipo((String) tablaSimbolos.buscarPorTipo("-var"));
+                }
+                listaNT.add(add);
                 lista.add(aux);
             }
         }
@@ -243,6 +284,9 @@ public class ManejadorSintactico {
         } else {
              for (NoTerminal nt : lnt) {
                 if (nt.getId().equals(ntS)) {
+                    if (noTerminal instanceof NoTerminal && !nt.isLambda()) {
+                        nt.setLambda(((NoTerminal) noTerminal).isLambda());
+                    }
                     nt.addProduccion(noTerminal);
                     nt.setReglaSemantica(rs);
                     bandera = true;
