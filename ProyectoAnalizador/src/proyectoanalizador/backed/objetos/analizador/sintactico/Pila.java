@@ -11,6 +11,7 @@ import proyectoanalizador.backed.objetos.analizador.lexico.Token;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
+import javax.swing.JOptionPane;
 
 /**
  *
@@ -30,7 +31,7 @@ public class Pila implements Serializable{
     private List<Terminal> listaTerminales;
     private List<NoTerminal> listaNoTerminales;
     private String actionCode;
-    
+
     public Pila(AnalizadorLexico analizadorLexico, List<Estado> estado) {
         this.analizadorLexico = analizadorLexico;
         this.pilaEstados = new Stack<>();
@@ -121,24 +122,15 @@ public class Pila implements Serializable{
                     estadoActual = pilaEstados.peek();
                     gtr = retornarInterseccion(getEstado(pilaEstados.peek()), enTurno);
                 } else if(gtr.getReview() != null) {
-                    if (gtr.getReview().getProduccionReview().getNoTerminal().isLambda() && gtr.getReview().getProduccionReview().getProduccion() instanceof NoTerminal && 
-                            ((NoTerminal) gtr.getReview().getProduccionReview().getProduccion()).isLambda()) {
-//                        pilaSimbolos.pop();
-                        pilaSimbolos.push(gtr.getReview().getProduccionReview().getNoTerminal().getId());
-                        registroEstados.add(getPilaEstados());
-                        registroSimbolos.add(getPilaSimbolos());
-                        registroAcciones.add("Review ( " + estadoActual + ", " + enTurno.getId() + ") " + gtr.getReview().getProduccionReview().produccion());
-                    } else {
-                        review(gtr);
-                        registroEstados.add(getPilaEstados());
-                        registroSimbolos.add(getPilaSimbolos());
-                        registroAcciones.add("Review ( " + estadoActual + ", " + enTurno.getId() + ") " + gtr.getReview().getProduccionReview().produccion());
-                    }
-                        estadoActual = pilaEstados.peek();
-                        gtr = retornarInterseccion(getEstado(pilaEstados.peek()), new Token(pilaSimbolos.peek(), ""));
-                } else if(gtr.isAceptar()) {
+                    review(gtr);
                     registroEstados.add(getPilaEstados());
                     registroSimbolos.add(getPilaSimbolos());
+                    registroAcciones.add("Review ( " + estadoActual + ", " + enTurno.getId() + ") " + gtr.getReview().getProduccionReview().produccion());
+                    estadoActual = pilaEstados.peek();
+                    gtr = retornarInterseccion(getEstado(pilaEstados.peek()), new Token(pilaSimbolos.peek(), ""));
+                } else if(gtr.isAceptar()) {
+//                    registroEstados.add(getPilaEstados());
+//                    registroSimbolos.add(getPilaSimbolos());
                     registroAcciones.add("Aceptado");
                     fin = false;
                     pilaEstados.removeAllElements();
@@ -151,9 +143,12 @@ public class Pila implements Serializable{
             }
         }
         if(enTurno.getId().equals("$") && pilaEstados.empty()){
+            JOptionPane.showMessageDialog(null, "Gramatica Aceptada, puedes ver en el apartado de pila para ver el procedimineto.");
             System.out.println("Aceptado");
      
         } else {
+            JOptionPane.showMessageDialog(null, "Error en la entrada, no se pudo reconocer el Token: <" + enTurno.getId() + "> Valor: <" + enTurno.getValor() 
+                    + "> en el Estado: " + estadoActual, "ERROR", JOptionPane.ERROR_MESSAGE);
             System.out.println("No aceptado");
         }
         print();

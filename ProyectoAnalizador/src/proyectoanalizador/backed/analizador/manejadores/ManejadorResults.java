@@ -6,6 +6,8 @@
 package proyectoanalizador.backed.analizador.manejadores;
 
 import java.util.List;
+import java.util.Stack;
+import proyectoanalizador.backed.objetos.analizador.lexico.Token;
 import proyectoanalizador.backed.objetos.analizador.sintactico.NoTerminal;
 import proyectoanalizador.backed.objetos.analizador.sintactico.Produccion;
 import proyectoanalizador.backed.objetos.analizador.sintactico.Terminal;
@@ -26,7 +28,8 @@ public class ManejadorResults {
     private List<Terminal> listaTeminales;
     private List<NoTerminal> listaNoTeminales;
     private List<Produccion> producciones;
-    private Object aux;
+    private Stack<Token> tokenActualesTerminales;
+    private Stack<Token> tokenActualesNoTerminales;
     
     private ManejadorResults(){} 
     
@@ -40,11 +43,74 @@ public class ManejadorResults {
         this.listaNoTeminales = listaNoTerminales;
         this.listaTeminales = listaTerminales;
         this.producciones = producciones;
+        this.tokenActualesNoTerminales = new Stack<>();
+        this.tokenActualesTerminales = new Stack<>();
     }
-//    
-//    public String returnClase(String actionCode){
-//        
-//    }
+    
+    //Agrega lso token terminales a una pila para cuando se realiza un reduce lo despila
+    public void addPilatokenTerminales(Token token){
+        this.tokenActualesTerminales.push(token);
+    }
+    
+    public void addPilatokenNoTerminales(Token token){
+        this.tokenActualesNoTerminales.push(token);
+    }
+    
+    public NoTerminal regresaNoTerminal(String id){
+        for (NoTerminal tnt : listaNoTeminales) {
+            if (tnt.getId().equals(id)) {
+                return tnt;
+            }
+        } return null;
+    }
+    
+    public Terminal regresarTerminal(String id){
+        for (Terminal tnt : listaTeminales) {
+            if (tnt.getId().equals(id)) {
+                return tnt;
+            }
+        } return null;
+    }
+    
+    public String generarCodigo(List<Object> listaTNT, String actionCode, String reglaSemantica){
+        String codigoSalida = 
+                "public class Reduce {";
+        codigoSalida += "\n" + actionCode;
+        codigoSalida += "\n\n\tpublic Object metodoAcciones() {";
+        codigoSalida += "\n\t\tObject RESULT = null;";
+        for (Object o : listaTNT) {
+            if (o != null) {
+                if (o instanceof Terminal) {
+                    Terminal t = regresarTerminal(o.toString());
+                    if (tokenActualesTerminales.empty()) {
+                        System.out.println("Terminal " + t.getId() + " Valor: " + t.getValorDevuelto() +  " ");
+                        codigoSalida += "\n\t\t" + getTipo(t.getTipo()) + " " + t.getValorDevuelto() + ";";
+                    } else {
+                        System.out.println("Terminal " + t.getId() + " Valor: " + t.getValorDevuelto() +  " - " + tokenActualesTerminales.pop());
+                        codigoSalida += "\n\t\t" + getTipo(t.getTipo()) + " " + t.getValorDevuelto() + " = ("  + getTipo(t.getTipo())+ ")" + tokenActualesTerminales.pop() + ";";
+                    }
+                } else {
+                    if (((NoTerminal) o ).isAceptacion() || ((NoTerminal) o).isLambda()) {
+                        
+                    } else {
+                        NoTerminal nt = regresaNoTerminal(o.toString());
+                        if (tokenActualesNoTerminales.empty()) {
+                            System.out.println("NoTerminal " + nt.getId() + " Valor: " + nt.getValorDevuelto() + " - ");
+                            codigoSalida += "\n\t\t" + getTipo(nt.getTipo()) + " " + nt.getValorDevuelto() + ";";
+                        } else {
+                            System.out.println("NoTerminal " + nt.getId() + " Valor: " + nt.getValorDevuelto() + " - " + tokenActualesNoTerminales.pop());
+                            codigoSalida += "\n\t\t" + getTipo(nt.getTipo()) + " " + nt.getValorDevuelto() + " = ("  + getTipo(nt.getTipo())+ ")" + tokenActualesNoTerminales.pop() + ";";
+                        }
+                    }
+                }
+            }
+        }
+        codigoSalida += "\n" + reglaSemantica;
+        codigoSalida += "\n\t\treturn = RESULT;";
+        codigoSalida += "\n\t}";
+        codigoSalida += "\n}";
+        return codigoSalida;
+    }
     
     
     public String getTipo(String id){
